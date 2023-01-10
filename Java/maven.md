@@ -132,7 +132,16 @@ mvn -N io.takari:maven:0.7.6:wrapper -Dmaven=3.3.3
 
 只需要把mvn命令改成mvnw就可以使用跟项目关联的Maven。
 
-# 六、发布Artifact
+
+# 六、在IDEA中使用Maven
+
+## 6.1 配置自己安装的Maven
+
+不同的项目配置不同的settings.xml
+
+![](images/2023-01-10-22-21-51.png)
+
+# 七、发布Artifact
 
 发布自己写的开源库
 
