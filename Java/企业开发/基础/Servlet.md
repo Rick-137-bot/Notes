@@ -100,6 +100,8 @@ void removeAttribute(k)
 
 # 七、Thymeleaf - 视图模板技术
 
+具体查看：[Thymeleaf](Java\企业开发\基础\Thymeleaf.md)
+
 Thymeleaf是一个模板引擎
 
 ## 7.1 模板引擎
@@ -145,4 +147,53 @@ th:unless
 * session（一次会话范围） 
 * application（整个应用程序范围）
 
+# 九、初始化
+
+有两个init方法：init() , init(config)
+
+可以重写init来在Servlet初始化时做一些准备工作。
+其中带参数的方法代码如下：
+``` java
+public void init(ServletConfig config) throws ServletException {
+ this.config = config ;
+ init();
+}
+```
+另外一个无参的init方法如下：
+``` java
+public void init() throws ServletException{
+}
+```
+
+## 9.1 在web.xml文件中配置Servlet
+
+``` xml
+<servlet>
+    <servlet-name>Demo01Servlet</servlet-name>
+    <servlet-class>com.atguigu.servlet.Demo01Servlet</servlet-class>
+    <init-param>
+        <param-name>hello</param-name>
+        <param-value>world</param-value>
+    </init-param>
+    <init-param>
+        <param-name>uname</param-name>
+        <param-value>jim</param-value>
+    </init-param>
+</servlet>
+<servlet-mapping>
+    <servlet-name>Demo01Servlet</servlet-name>
+    <url-pattern>/demo01</url-pattern>
+</servlet-mapping>
+```
+
+## 9.2 通过注解的方式配置Servlet
+
+``` java
+@WebServlet(urlPatterns = {"/demo01"} ,
+     initParams = {
+         @WebInitParam(name="hello",value="world"),
+         @WebInitParam(name="uname",value="jim")
+     }
+)
+```
 
