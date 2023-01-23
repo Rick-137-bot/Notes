@@ -374,11 +374,142 @@ Spring框架对JDBC进行封装，使用JdbcTemplate方便实现对数据库操�
 2. 配置JdbcTemplate对象，注入DataSource
 3. 创建service类，创建dao类，在dao注入jdbcTemplate对象
 
+## 4.2 CRUD
+
+### 4.2.1 增删改
+
+jdbcTemplate.update(String sql, Object... args);
+
+### 4.2.2 查
+
+``` java
+//返回某个值
+jdbcTemplate.queryForObject(String sql, Class<T> requirdeType);
+
+//返回某个对象,RowMapper是接口，针对返回不同类型数据，使用这个接口里面实现类完成数据封装
+jdbcTemplate.queryForObject(String sql, RowMapper<T> rowMapper, Object... args);
+```
+
+## 4.3 批量操作
+
+jdbcTemplate.batchUpdate(Spring sql,List<Object[]> batchArgs)
+
 
 
 # 五、事务管理
 
+Spring进行声明式事务管理，底层使用AOP原理
+
+## 5.1 事务管理原理和特性
+
+可以看[JDBC第六节事务](JDBC.md)
+
+## 5.2 注解式事务管理
+
+### 5.2.1 @Transactional
+
+#### 5.2.1.1 用法
+
+这个注解添加到类上面，也可以添加方法上面
+如果把这个注解添加类上面，这个类里面所有的方法都添加事务
+如果把这个注解添加方法上面，为这个方法添加事务
+
+第一步，在spring配置文件配置事务管理器
+第二步，在spring配置文件，开启事务注解
+第三步，在service类上面（或者service类里面方法上面）添加事务注解
+
+#### 5.2.1.2 参数
+
+1. propagation：事务传播行为
+2. ioslation：事务隔离级别
+3. timeout：超时时间
+4. readOnly：是否只读
+5. rollbackFor：回滚。设置出现哪些异常进行事务回滚
+6. noRollbackFor：不回滚。设置出现哪些异常不进行事务回滚
+
+## 5.3 XML事务管理
+
+第一步 配置事务管理器
+第二步 配置通知
+第三步 配置切入点和切面
+
+大体与AOP相同
+
+## 5.4 完全使用注解开发
+
+``` java
+@Configuration //配置类 
+@ComponentScan(basePackages = "com.jiao") //组件扫描 
+@EnableTransactionManagement //开启事务 
+public class TxConfig {
+
+}
+```
+
+创建配置类，使用配置类替代xml配置文件
+
 # 六、Spring5新特性
+
+## 6.1 日志框架
+
+集成了日志框架，建议使用Log4j2。
+
+## 6.2 @Nullable注解
+
+可以使用在方法上面，属性上面，参数上面，表示方法返回可以为空，属性值可以为空，参数值可以为空
+
+## 6.3 函数式风格GenericApplicationContext
+
+函数式风格创建对象，交给spring进行管理
+
+``` java
+//函数式风格创建对象，交给spring进行管理 
+public void testGenericApplicationContext() { 
+   //1 创建GenericApplicationContext对象 
+   GenericApplicationContext context = new GenericApplicationContext(); 
+   //2 调用context的方法对象注册 
+   context.refresh(); 
+   context.registerBean("user1",User.class,() -> new User()); 
+   //3 获取在spring注册的对象 
+   User user = (User)context.getBean("user1"); 
+   System.out.println(user); 
+}
+```
+
+## 6.4 JUnit5
+
+更方便测试操作
+
+``` java
+//@ExtendWith(SpringExtension.class) 
+//@ContextConfiguration("classpath:bean1.xml") 
+//使用一个复合注解替代上面两个注解完成整合
+@SpringJUnitConfig(locations = "classpath:bean1.xml")
+public class JTest5 { 
+   @Autowired 
+   private UserService userService; 
+   @Test 
+   public void test1() { 
+      userService.accountMoney(); 
+   } 
+}
+
+```
+
+## 6.5 Webflux
+学完SpringBoot2再来。。。
+
+### 6.5.1 介绍
+
+### 6.5.2 响应式开发
+
+### 6.5.3 执行流程和核心API
+
+### 6.5.4 基于注解
+
+### 6.5.5 响应式编程
+
+
 
 # 参考文献
 
