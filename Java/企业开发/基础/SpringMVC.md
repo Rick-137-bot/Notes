@@ -166,8 +166,25 @@ public String testParam(String username, String password){
 
 # 四、域对象共享数据
 
-    
+域内的对象共享一个物理位置
 
+## 4.1 request域对象共享数据
+
+### 4.1.1 ServletAPI
+
+### 4.1.2 ModelAndView
+
+### 4.1.3 Model
+
+### 4.1.4 map
+
+### 4.1.5 ModelMap
+
+### 4.1.6 Model、ModelMap、Map的关系
+
+## 4.2 向session域共享数据
+
+## 4.3 向application域共享数据
 
 
 # 参考文献
