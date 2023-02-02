@@ -170,21 +170,92 @@ public String testParam(String username, String password){
 
 ## 4.1 request域对象共享数据
 
-### 4.1.1 ServletAPI
+### 4.1.1 代码
 
-### 4.1.2 ModelAndView
+``` java
 
-### 4.1.3 Model
+// ServletAPI
+@RequestMapping("/testServletAPI")
+public String testServletAPI(HttpServletRequest request){
+    request.setAttribute("testScope", "hello,servletAPI");
+    return "success";
+}
 
-### 4.1.4 map
+// ModelAndView
+@RequestMapping("/testModelAndView")
+public ModelAndView testModelAndView(){
+    /**
+     * ModelAndView有Model和View的功能
+     * Model主要用于向请求域共享数据
+     * View主要用于设置视图，实现页面跳转
+     */
+    ModelAndView mav = new ModelAndView();
+    //向请求域共享数据
+    mav.addObject("testScope", "hello,ModelAndView");
+    //设置视图，实现页面跳转
+    mav.setViewName("success");
+    return mav;
+}
 
-### 4.1.5 ModelMap
+// Model
+@RequestMapping("/testModel")
+public String testModel(Model model){
+    model.addAttribute("testScope", "hello,Model");
+    return "success";
+}
 
-### 4.1.6 Model、ModelMap、Map的关系
+// map
+@RequestMapping("/testMap")
+public String testMap(Map<String, Object> map){
+    map.put("testScope", "hello,Map");
+    return "success";
+}
+
+// ModelMap
+@RequestMapping("/testModelMap")
+public String testModelMap(ModelMap modelMap){
+    modelMap.addAttribute("testScope", "hello,ModelMap");
+    return "success";
+}
+```
+
+### 4.1.2 Model、ModelMap、Map的关系
+
+本质上都是 BindingAwareModelMap 类型的
+``` java
+public interface Model{}
+public class ModelMap extends LinkedHashMap<String, Object> {}
+public class ExtendedModelMap extends ModelMap implements Model {}
+public class BindingAwareModelMap extends ExtendedModelMap {}
+```
 
 ## 4.2 向session域共享数据
 
+``` java
+
+//ServletAPI
+@RequestMapping("/testSession")
+public String testSession(HttpSession session){
+    session.setAttribute("testSessionScope", "hello,session");
+    return "success";
+}
+```
+
 ## 4.3 向application域共享数据
+
+``` java
+
+//ServletAPI
+@RequestMapping("/testApplication")
+public String testApplication(HttpSession session){
+    ServletContext application = session.getServletContext();
+    application.setAttribute("testApplicationScope", "hello,application");
+    return "success";
+}
+```
+
+# 五、SpringMVC的视图
+
 
 
 # 参考文献
