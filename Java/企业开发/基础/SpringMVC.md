@@ -256,6 +256,76 @@ public String testApplication(HttpSession session){
 
 # 五、SpringMVC的视图
 
+是View接口，作用是渲染数据，将模型Model中的数据展示给用户
+
+当工程引入jstl的依赖，转发视图会自动转换为JstlView
+
+若使用的视图技术为Thymeleaf，在SpringMVC的配置文件中配置了Thymeleaf的视图解析器，由此视图解析器解析之后所得到的是ThymeleafView
+
+## 5.1 ThymeleafView
+
+直接跳转到页面
+
+控制器方法中所设置的视图名称没有任何前缀
+
+视图名称拼接视图前缀和视图后缀所得到的最终路径，会通过转发的方式实现跳转
+
+## 5.2 转发视图
+
+就是跳转到某一个请求
+
+默认的转发视图是InternalResourceView
+
+"forward:"为前缀时，创建InternalResourceView视图，此时的视图名称不会被SpringMVC配置文件中所配置的视图解析器解析，而是会将前缀"forward:"去掉，剩余部分作为最终路径通过转发的方式实现跳转
+
+## 5.3 重定向视图
+
+也是跳转到某一个请求，不过是以重定向的方式
+
+默认的重定向视图是RedirectView
+
+"redirect:"为前缀时，创建RedirectView视图，此时的视图名称不会被SpringMVC配置文件中所配置的视图解析器解析，而是会将前缀"redirect:"去掉，剩余部分作为最终路径通过重定向的方式实现跳转
+
+
+## 5.4 视图控制器view-controller
+
+只需要设置视图名称
+
+``` xml 
+<!--
+    path：设置处理的请求地址
+    view-name：设置请求地址所对应的视图名称
+-->
+<mvc:view-controller path="/testView" view-name="success"></mvc:view-controller>
+```
+
+>注：
+当SpringMVC中设置任何一个view-controller时，其他控制器中的请求映射将全部失效，此时需要在SpringMVC的核心配置文件中设置开启mvc注解驱动的标签：<mvc:annotation-driven />
+
+## 5.5 视图解析器 InternalResourceViewResolver
+
+JSP解析
+
+# 六、RESTful
+
+是一种软件架构的风格
+
+## 6.1 简介
+
+REST：Representational State Transfer，表现层资源状态转移。
+
+表现层：View->Controller的过程
+
+资源：每个资源是服务器上一个可命名的抽象概念
+
+资源的表述：是一段对于资源在某个特定时刻的状态的描述。
+
+状态转移：在客户端和服务器端之间转移（transfer）代表资源状态的表述。通过转移和操作资源的表述，来间接实现操作资源的目的。
+
+
+
+
+
 
 
 # 参考文献
