@@ -322,11 +322,29 @@ REST：Representational State Transfer，表现层资源状态转移。
 
 状态转移：在客户端和服务器端之间转移（transfer）代表资源状态的表述。通过转移和操作资源的表述，来间接实现操作资源的目的。
 
+| 操作     | 传统方式         | REST风格                |
+| -------- | ---------------- | ----------------------- |
+| 查询操作 | getUserById?id=1 | user/1-->get请求方式    |
+| 保存操作 | saveUser         | user-->post请求方式     |
+| 删除操作 | deleteUser?id=1  | user/1-->delete请求方式 |
+| 更新操作 | updateUser       | user-->put请求方式      |
 
+## 6.2 HiddenHttpMethodFilter
 
+是一个过滤器
 
+浏览器只接受get和post使用HiddenHttpMethodFilter将POST请求转换为DELETE和PUT请求
 
+# 七、HttpMessageConverter
 
+报文信息转换器，将请求报文转换为Java对象，或将Java对象转换为响应报文
+
+## 7.1 @RequestBody
+
+## 7.2 RequestEntity
+## 7.3 @ResponseBody
+## 7.4
+## 7.5
 
 # 参考文献
 
