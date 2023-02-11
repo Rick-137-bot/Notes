@@ -136,7 +136,7 @@ ${}使用字符串拼接的方式拼接sql，若为字符串类型或日期类�
 
 ## 4.1 实体类类型的参数
 
-### 1. 单个字面量类型的参数
+### i. 单个字面量类型的参数
 
 可以使用\${}和#{}以任意的名称（最好见名识意）获取参数的值,${}需要手动加单引号
 
@@ -148,7 +148,8 @@ ${}使用字符串拼接的方式拼接sql，若为字符串类型或日期类�
     select * from t_user where username = '${username}' 
 </select>
 ```
-### 2. 多个字面量类型的参数
+
+### ii. 多个字面量类型的参数
 
 * 参数为多个时，此时MyBatis会自动将这些参数放在一个map集合中:
   * 以arg0,arg1...为键，以参数为值；
@@ -156,15 +157,51 @@ ${}使用字符串拼接的方式拼接sql，若为字符串类型或日期类�
 * 只需要通过${}和#{}访问map集合的键就可以获取相对应的值
 * 使用arg或者param都行，arg是从arg0开始的，param是从param1开始的
 
+### iii. map集合类型的参数
 
+可以手动创建map集合，将这些数据放在map中只需要通过${}和#{}访问map集合的键就可以获取相对应的值
 
+``` java
+public void checkLoginByMap() {
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+    Map<String,Object> map = new HashMap<>();
+    // select * from t_user where username = #{username} and password = #{password}
+    map.put("usermane","admin");
+    map.put("password","123456");
+    User user = mapper.checkLoginByMap(map);
+}
+```
 
-### 3. map集合类型的参数
-### 4. 实体类类型的参数
+### iv. 实体类类型的参数
 
+直接使用\${}和#{}
+
+``` java 
+public void insertUser() {
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+    // insert into t_user values(null,#{username},#{password},#{age},#{sex},#{email})
+    User user = new User(null,"Tom","123456",12,"男","123@321.com");
+    mapper.insertUser(user);
+}
+```
 
 ## 4.2 使用@Param标识参数
 
+可以通过@Param注解标识mapper接口中的方法参数，此时，会将这些参数放在map集合中
+1. 以@Param注解的value属性值为键，以参数为值；
+2. 以param1,param2...为键，以参数为值；
+
+``` java
+public void checkLoginByParam() {
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+    //User CheckLoginByParam(@Param("username") String username, @Param("password") String password);
+    //select * from t_user where username = #{username} and password = #{password}
+    mapper.CheckLoginByParam("admin","123456");
+}
+```
 
 # 参考文献
 
