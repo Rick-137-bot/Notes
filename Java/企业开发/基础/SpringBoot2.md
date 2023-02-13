@@ -70,6 +70,19 @@ SpringBoot+SpringCloud
 
 容器技术
 
+# 二、开发过程
+
+1. 引入依赖
+2. 创建主程序(MainApplication)
+3. 写入业务
+4. 编写配置文件(application.properties)
+5. 测试运行
+6. 简化部署(打包jar)
+
+
+# 三、自动配置
+
+
 
 
 
@@ -93,5 +106,8 @@ SpringBoot+SpringCloud
 
 # 参考文献
 
+[官方文档](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)
+
 [尚硅谷(视频)](https://www.bilibili.com/video/BV19K4y1L7MT)
+
 [尚硅谷(笔记)](https://www.yuque.com/atguigu/springboot)
