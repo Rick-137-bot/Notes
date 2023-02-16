@@ -86,6 +86,18 @@ SpringBoot+SpringCloud
 
 ### 3.1.1 依赖管理
 
+#### 父项目做依赖管理
+
+1. 声明了几乎所有开发中常用的依赖的版本号。
+2. 可以查找到父项目中规定依赖版本的key使用\<properties>标签来自定义版本号
+
+
+#### starter场景启动器
+
+1. spring-boot-starter-* 表示引入*场景所需要的所有依赖
+2. SpringBoot所有支持的场景：https://docs.spring.io/spring-boot/docs/current/reference/html/using-spring-boot.html#using-boot-starter
+3. *-spring-boot-starter： 第三方为我们提供的简化开发的场景启动器。
+
 ### 3.1.2 自动配置
 
 ## 3.2 容器功能
