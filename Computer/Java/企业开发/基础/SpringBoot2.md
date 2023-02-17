@@ -75,7 +75,7 @@ SpringBoot+SpringCloud
 1. 引入依赖
 2. 创建主程序(MainApplication)
 3. 写入业务
-4. 编写配置文件(application.properties)
+4. 编写配置文件(application.properties/application.yml)
 5. 测试运行
 6. 简化部署(打包jar)
 
@@ -100,9 +100,34 @@ SpringBoot+SpringCloud
 
 ### 3.1.2 自动配置
 
+自动配置Tomcat
+自动配置SpringMVC
+自动按规则创建包
+
+>可以使用@SpringBootApplication(scanBasePackages="com.atguigu")
+或者@ComponentScan 指定扫描路径
+
+配置项是按需加载的
+
 ## 3.2 容器功能
 
 ### 3.2.1 组件添加
+
+#### i @Configuration
+
+作用：声明配置类
+
+与Spring5的全注解开发相同
+
+Full模式与Lite模式
+配置类组件之间无依赖关系用Lite模式加速容器启动过程，减少判断
+配置类组件之间有依赖关系，方法会被调用得到之前单实例组件，用Full模式
+
+#### ii @Import
+
+给容器中调用无参构造创建对象。
+
+#### iii @Conditional 
 
 ### 3.2.2 原生配置文件导入
 
