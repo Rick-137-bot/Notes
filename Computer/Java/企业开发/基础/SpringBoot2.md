@@ -129,25 +129,278 @@ Full模式与Lite模式
 
 #### iii @Conditional 
 
-### 3.2.2 原生配置文件导入
+条件装配：满足Conditional指定的条件，则进行组件注入
 
-### 3.2.3 配置绑定
+#### iv @ImportResource
+
+导入原始的配置文件
+
+### 3.2.2 配置绑定
+
+如何使用Java读取到properties文件中的内容，并且把它封装到JavaBean中，以供随时使用；
+
+1. @ConfigurationProperties
+2. @EnableConfigurationProperties + @ConfigurationProperties
+3. @Component + @ConfigurationProperties
 
 ## 3.3 自动配置原理入门
 
-### 3.3.1 引导加载自动配置类
+@SpringBootApplication是由：@SpringBootConfiguration、@ComponentScan、@EnableAutoConfiguration合成的注解
 
-### 3.3.2 按需开启自动配置项
+``` java
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
+		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
+public @interface SpringBootApplication{}
+
+```
+
+### 3.3.1 @SpringBootConfiguration
+
+@Configuration 代表是一个配置类
+
+### 3.3.2 @ComponentScan
+
+指定扫描哪些，Spring注解；
+
+### 3.3.3 @EnableAutoConfiguration
+
+``` java
+@AutoConfigurationPackage
+@Import(AutoConfigurationImportSelector.class)
+public @interface EnableAutoConfiguration {}
+```
+
+#### i. @AutoConfigurationPackage
+
+``` java
+@Import(AutoConfigurationPackages.Registrar.class)  //给容器中导入一个组件
+public @interface AutoConfigurationPackage {}
+
+//利用Registrar给容器中导入一系列组件
+//将指定的一个包下的所有组件导入进来？MainApplication 所在包下。
+```
+
+#### ii. @Import(AutoConfigurationImportSelector.class)
+
+1. 利用getAutoConfigurationEntry(annotationMetadata);给容器中批量导入一些组件
+2. 调用List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes)获取到所有需要导入到容器中的配置类
+3. 利用工厂加载 Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader)；得到所有的组件
+4. 从META-INF/spring.factories位置来加载一个文件。
+	1. 默认扫描我们当前系统里面所有META-INF/spring.factories位置的文件
+	2. spring-boot-autoconfigure-2.3.4.RELEASE.jar包里面也有META-INF/spring.factories
+    
+
+### 3.3.4 按需开启自动配置项
+
+按照条件装配规则（@Conditional），最终会按需配置。
 
 ### 3.3.3 修改默认配置
 
-## 3.4 开发技巧
+默认会在底层配好所有的组件。但是如果用户自己配置了以用户的优先
 
-### 3.4.1 Lombok
 
-### 3.4.2 dev-tools
+直接自己@Bean替换底层的组件
+看这个组件是获取的配置文件什么值就去修改。
 
-### 3.4.3 Spring Initailizr
+## 3.4 配置流程
+
+* 引入场景依赖
+    * https://docs.spring.io/spring-boot/docs/current/reference/html/using-spring-boot.html#using-boot-starter
+* 查看自动配置了哪些（选做）
+    * 自己分析，引入场景对应的自动配置一般都生效了
+    * 配置文件中debug=true开启自动配置报告。Negative（不生效）\Positive（生效）
+* 是否需要修改
+    * 参照文档修改配置项
+      * https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#common-application-properties
+      * 自己分析。xxxxProperties绑定了配置文件的哪些。
+    * 自定义加入或者替换组件
+      * @Bean、@Component。。。
+    * 自定义器  XXXXXCustomizer；
+
+## 3.5 配置技巧
+
+### 3.5.1 Lombok
+
+
+maven引入并且ide安装插件
+
+#### i. 简化JavaBean开发
+
+@Data：编译时生成属性的get&set方法
+@ToString：编译时生成ToString方法
+(@NoArgsConsructor/@AllArgsConsructor)：无参/全参构造器
+@EqualsAndHashCode：重写Equals和HashCode方法
+
+#### ii. 简化日志开发
+
+@Slf4j：类中注入日志
+
+### 3.5.2 dev-tools
+
+项目或者页面修改以后：Ctrl+F9；就会重新编译项目
+
+### 3.5.3 Spring Initailizr
+
+项目初始化向导，整合在idea里
+
+自动依赖引入
+自动创建项目结构
+自动编写好主配置类
+
+# 四、配置文件
+
+有两种配置语言properties和yaml，因为yaml更加简洁方便所以多用yaml
+
+## 4.1 yaml
+
+### 4.1.1 简介
+
+YAML 是 "YAML Ain't Markup Language"（YAML 不是一种标记语言）的递归缩写。在开发的这种语言时，YAML 的意思其实是："Yet Another Markup Language"（仍是一种标记语言）。
+
+非常适合用来做以数据为中心的配置文件
+
+### 4.1.2 基本语法
+
+* key: value；kv之间有空格
+* 大小写敏感
+* 使用缩进表示层级关系
+* 缩进不允许使用tab，只允许空格
+* 缩进的空格数不重要，只要相同层级的元素左对齐即可
+* '#'表示注释
+* 字符串无需加引号，如果要加，''与""表示字符串内容 会被 转义/不转义
+
+#### 4.1.3 数据类型
+
+``` yaml
+# 1、字面量:单个的、不可再分的值。date、boolean、string、number、null.
+k: v
+
+# 2、对象：键值对的集合。map、hash、set、object 
+k: {k1:v1,k2:v2,k3:v3}
+#或
+k: 
+	k1: v1
+  k2: v2
+  k3: v3
+
+# 3、数组：一组按次序排列的值。array、list、queue
+k: [v1,v2,v3]
+#或者
+k:
+ - v1
+ - v2
+ - v3
+```
+
+## 4.2 配置提示
+
+``` xml
+<!-- maven导入configuration processor包使得自定义文件有配置提示 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+</dependency>
+
+<!-- 设置Spring打包时不打包只在开发时使用的的工具 -->
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <excludes>
+                    <exclude>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-configuration-processor</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+# 五、web开发
+
+## 5.1 简单功能分析
+
+### 5.1.1 静态资源访问
+
+静态资源：前端的固定页面，这里面包含HTML、CSS、JS、图片等等不需要查数据库也不需要程序处理，直接就能够显示的页面。
+
+#### i. 静态资源目录
+
+放在类路径下 ：/static (or /public or /resources or /META-INF/resources
+访问 ： 当前项目根路径/ + 静态资源名 
+
+原理：请求进来，先去找Controller看能不能处理。不能处理的所有请求又都交给静态资源处理器。静态资源也找不到则响应404页面。
+
+改变默认的静态资源路径：
+
+``` yaml
+spring:
+  mvc:
+    static-path-pattern: /res/**
+
+web:
+  resources:
+    static-locations: classpath:/haha/
+```
+
+当前项目 + static-path-pattern + 静态资源名 = 静态资源文件夹下找
+
+> 注：static-path-pattern为虚拟路径，真实路径为static-locations中的路径
+
+#### ii. webjar
+
+https://www.webjars.org/
+
+
+把一些东西打包成可以静态访问的jar包
+
+自动映射 /webjars/**
+
+### 5.1.2 欢迎页
+
+* 静态资源路径下  index.html
+* controller能处理/index
+
+
+### 5.1.3 自定义Favicon
+
+Facicon：标签页小图标
+
+favicon.ico 放在静态资源目录下即可。
+
+## 5.2 请求参数处理
+
+## 5.3 数据响应与内容协商
+
+## 5.4 视图解析与模板引擎
+
+## 5.5 拦截器
+
+## 5.6 文件上传
+
+## 5.7 异常处理
+
+## 5.8 Web原生组件注入
+
+## 5.9 嵌入式Servelt容器
+
+## 5.10 定制化原理
+
+
+# 六、数据访问
+
+# 七、单元测试
+
+# 八、指标监控
+
+# 九、原理解析
 
 
 
