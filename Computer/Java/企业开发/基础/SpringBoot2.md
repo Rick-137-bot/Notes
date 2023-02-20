@@ -377,6 +377,26 @@ favicon.ico 放在静态资源目录下即可。
 
 ## 5.2 请求参数处理
 
+### 5.2.1 请求映射
+
+同SpringMVC。
+
+>注
+SpringBoot自动配置欢迎页的 WelcomePageHandlerMapping 。访问 /能访问到index.html；
+SpringBoot自动配置了默认 的 RequestMappingHandlerMapping
+
+### 5.2.2 普通参数与基本注解
+
+#### 注解
+
+@PathVariable、@RequestHeader、@ModelAttribute、@RequestParam、@MatrixVariable、@CookieValue、@RequestBody
+
+#### ServletAPI
+
+#### 复杂参数
+
+#### 自定义对象参数
+
 ## 5.3 数据响应与内容协商
 
 ## 5.4 视图解析与模板引擎
