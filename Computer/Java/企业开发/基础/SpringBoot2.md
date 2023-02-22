@@ -389,11 +389,38 @@ SpringBoot自动配置了默认 的 RequestMappingHandlerMapping
 
 #### 注解
 
-@PathVariable、@RequestHeader、@ModelAttribute、@RequestParam、@MatrixVariable、@CookieValue、@RequestBody
+@PathVariable：路径
+@RequestHeader：请求头
+@RequestParam：请求参数
+@RequestAttribute：Request域属性
+@CookieValue：Cookie域属性
+@MatrixVariable：矩阵变量；2.7.2版本之前SpringBoot默认禁用。
+@RequestBody：请求体
 
 #### ServletAPI
 
+WebRequest
+ServletRequest
+MultipartRequest
+HttpSession
+javax.servlet.http.PushBuilder
+Principal
+InputStream
+Reader
+HttpMethod
+Locale
+TimeZone
+ZoneId
+
 #### 复杂参数
+
+Map、Model（map、model里面的数据会被放在request的请求域  request.setAttribute）
+Errors/BindingResult
+RedirectAttributes（ 重定向携带数据）
+ServletResponse（response）
+SessionStatus
+UriComponentsBuilder
+ServletUriComponentsBuilder
 
 #### 自定义对象参数
 
