@@ -426,22 +426,287 @@ ServletUriComponentsBuilder
 
 ## 5.3 数据响应与内容协商
 
+###  5.3.1 响应JSON
+
+使用jackson.jar+@ResponseBody可以实现给前端自动返回json数据；
+
+#### 返回值处理器原理
+
+1. 返回值处理器判断是否支持这种类型返回值 supportsReturnType
+2. 返回值处理器调用 handleReturnValue 进行处理
+3. RequestResponseBodyMethodProcessor 可以处理返回值标了@ResponseBody 注解的。
+4. 利用 MessageConverters 进行处理 将数据写为json
+    1. 内容协商（浏览器默认会以请求头的方式告诉服务器他能接受什么样的内容类型）
+    2. 服务器最终根据自己自身的能力，决定服务器能生产出什么样内容类型的数据，
+    3. SpringMVC会挨个遍历所有容器底层的 HttpMessageConverter ，看谁能处理？
+        1. 得到MappingJackson2HttpMessageConverter可以将对象写为json
+        2. 利用MappingJackson2HttpMessageConverter将对象转为json再写出去。
+
+#### HTTPMessageConverter原理
+
+看是否支持将此Class类型的对象，转为MediaType类型的数据。
+
+### 5.3.2 内容协商
+
+根据客户端需求，返回不同媒体类型的数据。
+
+根据的是请求头中Accept字段。Http协议中规定的，告诉服务器本客户端可以接收的数据类型。
+浏览器发送不同请求可以在SpringBoot设置中开启根据参数内容协商，根据参数format
+
+#### 原理
+
+1. 判断当前响应头中是否已经有确定的媒体类型。MediaType
+2. 获取客户端（PostMan、浏览器）支持接收的内容类型。（获取客户端Accept请求头字段）
+3. 遍历循环所有当前系统的 MessageConverter，看谁支持操作这个对象
+4. 找到支持的converter，把converter支持的媒体类型统计出来。
+   ![](images/2023-02-23-16-10-25.png)
+5. 进行内容协商的最佳匹配媒体类型
+6. 用支持将对象转为最佳匹配媒体类型的converter。调用它进行转化 。
+
+#### 自定义MessageConverter
+
+实现多协议数据兼容。json、xml、x-jiao
+
+方法一：使用WebMvcConfigurer类中的
+方法二：配置文件配置spring.mvc.contentnegotiation.media-types.*
+
+方法一会导致覆盖默认很多功能，导致一些默认的功能失效。
+
 ## 5.4 视图解析与模板引擎
+
+### 5.4.1 原理
+
+1. 目标方法处理的过程中，所有数据都会被放在 ModelAndViewContainer 里面。包括数据和视图地址
+2. 方法的参数是一个自定义类型对象（从请求参数中确定的），把他重新放在 ModelAndViewContainer
+3. 任何目标方法执行完成以后都会返回 ModelAndView（数据和视图地址）。
+4. processDispatchResult  处理派发结果（页面改如何响应）
+   * render(mv, request, response); 进行页面渲染逻辑
+      * 根据方法的String返回值得到 View 对象【定义了页面的渲染逻辑】
+         1. 所有的视图解析器尝试是否能根据当前返回值得到View对象
+         2. 得到了  redirect:/main.html --> Thymeleaf new RedirectView()
+         3. ContentNegotiationViewResolver 里面包含了下面所有的视图解析器，内部还是利用下面所有视图解析器得到视图对象。
+         4. view.render(mv.getModelInternal(), request, response);   视图对象调用自定义的render进行页面渲染工作
+            * RedirectView 如何渲染【重定向到一个页面】
+               1. 获取目标url地
+               2. response.sendRedirect(encodedURL);
+
+### 5.4.2 模板引擎Thymeleaf
+
+Thymeleaf：Thymeleaf.md
 
 ## 5.5 拦截器
 
+### 5.5.1 HandlerInterceptor 接口
+
+先配置好拦截器拦截业务
+放入容器中
+
 ## 5.6 文件上传
+
+### 5.6.1 页面表单
+
+``` html
+<form method="post" action="/upload" enctype="multipart/form-data">
+    <input type="file" name="file"><br>
+    <input type="submit" value="提交">
+</form>
+```
+
+### 5.6.2 文件上传代码
+
+``` java
+/**
+* MultipartFile 自动封装上传过来的文件
+* @param email
+* @param username
+* @param headerImg
+* @param photos
+* @return
+*/
+@PostMapping("/upload")
+public String upload(@RequestParam("email") String email,
+                    @RequestParam("username") String username,
+                    @RequestPart("headerImg") MultipartFile headerImg,
+                    @RequestPart("photos") MultipartFile[] photos) throws IOException {
+
+   log.info("上传的信息：email={}，username={}，headerImg={}，photos={}",
+           email,username,headerImg.getSize(),photos.length);
+
+   if(!headerImg.isEmpty()){
+       //保存到文件服务器，OSS服务器
+       String originalFilename = headerImg.getOriginalFilename();
+       headerImg.transferTo(new File("H:\\cache\\"+originalFilename));
+   }
+
+   if(photos.length > 0){
+       for (MultipartFile photo : photos) {
+           if(!photo.isEmpty()){
+               String originalFilename = photo.getOriginalFilename();
+               photo.transferTo(new File("H:\\cache\\"+originalFilename));
+           }
+       }
+   }
+
+
+   return "main";
+}
+```
 
 ## 5.7 异常处理
 
+### 5.7.1 错误处理
+
+#### 默认规则
+
+SpringBoot默认提供/error处理所有错误的映射
+
+对于机器客户端，它将生成JSON响应，其中包含错误，HTTP状态和异常消息的详细信息。
+对于浏览器客户端，响应一个“ whitelabel”错误视图，以HTML格式呈现相同的数据
+
+添加View解析为error就可以自定义error页面了
+要完全替换默认行为，可以实现 ErrorController 并注册该类型的Bean定义，或添加ErrorAttributes类型的组件以使用现有机制但替换其内容。
+
+error/下的4xx，5xx页面会被自动解析
+
+### 5.7.2 异常处理步骤流程
+
+1. 执行目标方法，目标方法运行期间有任何异常都会被catch、而且标志当前请求结束；并且用 dispatchException 
+2. 进入视图解析流程（页面渲染？） processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+3. mv = processHandlerException；处理handler发生的异常，处理完成返回ModelAndView；
+   1. 遍历所有的 handlerExceptionResolvers，看谁能处理当前异常【HandlerExceptionResolver处理器异常解析器】
+   2. 系统默认的异常解析器；
+      - DefaultErrorAttributes先来处理异常。把异常信息保存到rrequest域，并且返回null；
+      - 默认没有任何人能处理异常，所以异常会被抛出
+        1. 如果没有任何人能处理最终底层就会发送 /error 请求。会被底层的BasicErrorController处理
+        2. 解析错误视图；遍历所有的  ErrorViewResolver  看谁能解析。
+        3. 默认的 DefaultErrorViewResolver ,作用是把响应状态码作为错误页的地址，error/500.html 
+        4. 模板引擎最终响应这个页面 error/500.html 
+
 ## 5.8 Web原生组件注入
+
+### 5.8.1 使用Servelt API
+
+@ServletComponentScan(basePackages = "com.jiao.admin") :指定原生Servlet组件都放在那里
+
+@WebServlet(urlPatterns = "/my")：效果：直接响应，没有经过Spring的拦截器？
+@WebFilter(urlPatterns={"/css/*","/images/*"})
+@WebListener
+
+### 5.8.2 使用RegistrationBean
+
+ServletRegistrationBean, FilterRegistrationBean, and ServletListenerRegistrationBean
+
+``` java
+@Configuration
+public class MyRegistConfig {
+
+    @Bean
+    public ServletRegistrationBean myServlet(){
+        MyServlet myServlet = new MyServlet();
+
+        return new ServletRegistrationBean(myServlet,"/my","/my02");
+    }
+
+
+    @Bean
+    public FilterRegistrationBean myFilter(){
+
+        MyFilter myFilter = new MyFilter();
+//        return new FilterRegistrationBean(myFilter,myServlet());
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(myFilter);
+        filterRegistrationBean.setUrlPatterns(Arrays.asList("/my","/css/*"));
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public ServletListenerRegistrationBean myListener(){
+        MySwervletContextListener mySwervletContextListener = new MySwervletContextListener();
+        return new ServletListenerRegistrationBean(mySwervletContextListener);
+    }
+}
+```
+
 
 ## 5.9 嵌入式Servelt容器
 
+### 5.9.1 切换嵌入式Servelt容器
+
+默认支持的webServer：Tomcat, Jetty, or Undertow
+ServletWebServerApplicationContext 容器启动寻找ServletWebServerFactory 并引导创建服务器
+
+#### 原理
+
+* SpringBoot应用启动发现当前是Web应用。web场景包-导入tomcat
+* web应用会创建一个web版的ioc容器ServletWebServerApplicationContext 
+* ServletWebServerApplicationContext  启动的时候寻找 ServletWebServerFactory（Servlet 的web服务器工厂---> Servlet 的web服务器）  
+* SpringBoot底层默认有很多的WebServer工厂；TomcatServletWebServerFactory, JettyServletWebServerFactory, or UndertowServletWebServerFactory
+* 底层直接会有一个自动配置类。ServletWebServerFactoryAutoConfiguration
+* ServletWebServerFactoryAutoConfiguration导入了ServletWebServerFactoryConfiguration（配置类）
+* ServletWebServerFactoryConfiguration 配置类 根据动态判断系统中到底导入了那个Web服务器的包。（默认是web-starter导入tomcat包），容器中就有 TomcatServletWebServerFactory
+* TomcatServletWebServerFactory 创建出Tomcat服务器并启动；TomcatWebServer 的构造器拥有初始化方法initialize---this.tomcat.start();
+* 内嵌服务器，就是手动把启动服务器的代码调用（tomcat核心jar包存在）
+
+### 5.9.2 定制Servlet容器
+
+* 实现  WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> 
+  * 把配置文件的值和ServletWebServerFactory 进行绑定
+* 修改配置文件 server .xxx
+* 直接自定义 ConfigurableServletWebServerFactory 
+
 ## 5.10 定制化原理
+
+* 修改配置文件；
+* xxxxxCustomizer；
+* 编写自定义的配置类   xxxConfiguration；+ @Bean替换、增加容器中默认组件；视图解析器 
+* **Web应用 编写一个配置类实现 WebMvcConfigurer 即可定制化web功能；+ @Bean给容器中再扩展一些组件**
+* @EnableWebMvc + WebMvcConfigurer —— @Bean  可以全面接管SpringMVC，所有规则全部自己重新配置； 实现定制和扩展功能
 
 
 # 六、数据访问
+
+## 6.1 SQL
+
+### 6.1.1 自动配置数据源-HikariDataSource
+
+![](images/2023-02-24-17-15-02.png)
+
+单独根据数据库版本导入相应版本的驱动
+
+#### 自动配置
+
+* DataSourceAutoConfiguration ： 数据源的自动配置
+  * 修改数据源相关的配置：spring.datasource
+  * 数据库连接池的配置，是自己容器中没有DataSource才自动配置的
+  * 底层配置好的连接池是：HikariDataSource
+* DataSourceTransactionManagerAutoConfiguration： 事务管理器的自动配置
+* JdbcTemplateAutoConfiguration： JdbcTemplate的自动配置，可以来对数据库进行crud
+  * 可以修改这个配置项@ConfigurationProperties(prefix = "spring.jdbc") 来修改JdbcTemplate
+  * @Bean@Primary    JdbcTemplate；容器中有这个组件
+* JndiDataSourceAutoConfiguration： jndi的自动配置
+* XADataSourceAutoConfiguration： 分布式事务相关的
+
+### 6.1.2 Druid
+
+druid官方github地址
+https://github.com/alibaba/druid
+
+#### 自定义方式
+
+#### 官方starter
+
+### 6.1.3 MyBatis
+
+### 6.1.4 MyBatisPlus
+
+## 6.2 NoSQL
+
+### 6.2.1 Redis自动配置
+
+### 6.2.2 RedisTemplate与Lettuce
+
+### 6.2.3 jedis
+
+
 
 # 七、单元测试
 
