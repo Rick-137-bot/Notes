@@ -690,11 +690,29 @@ ServletWebServerApplicationContext 容器启动寻找ServletWebServerFactory 并
 druid官方github地址
 https://github.com/alibaba/druid
 
-#### 自定义方式
+* 有两种方式
+  * 自定义方式
+  * 官方stater方式
 
-#### 官方starter
 
 ### 6.1.3 MyBatis
+
+https://github.com/mybatis
+
+#### 配置模式
+
+全局配置文件：
+* SqlSessionFactory: 自动配置好了
+* SqlSession：自动配置了 SqlSessionTemplate 组合了SqlSession
+* @Import(AutoConfiguredMapperScannerRegistrar.class）；
+* Mapper： 只要我们写的操作MyBatis的接口标准了 @Mapper 就会被自动扫描进来
+
+过程：
+
+* 导入mybatis官方starter
+* 编写mapper接口。标准@Mapper注解
+* 编写sql映射文件并绑定mapper接口
+* 在application.yaml中指定Mapper配置文件的位置，以及指定全局配置文件的信息 （建议；配置在mybatis.configuration）
 
 ### 6.1.4 MyBatisPlus
 
