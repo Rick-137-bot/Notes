@@ -30,5 +30,6 @@
 
 # 参考文献
 
+[官方文档](https://baomidou.com)
 [尚硅谷(视频)](https://www.bilibili.com/video/BV12R4y157Be)
 [vz-Blog(笔记)](https://www.oz6.cn/articles/55)
